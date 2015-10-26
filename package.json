@@ -1,0 +1,29 @@
+{
+  "name": "confluencePaletteExporter",
+  "version": "0.0.1",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "watch": "gulp",
+    "test": "node test/test.js"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "cheerio": "^0.19.0",
+    "colors": "^1.1.0",
+    "commander": "^2.8.1",
+    "gift": "^0.6.0",
+    "glob": "^5.0.5",
+    "promise": "^7.0.1",
+    "prompt": "^0.2.14",
+    "sanitize-html": "^1.6.1"
+  },
+  "devDependencies": {
+    "gulp": "^3.8.11",
+    "gulp-babel": "^5.1.0",
+    "gulp-rename": "^1.2.2",
+    "gulp-watch": "^4.2.4",
+    "gulp-jsdoc": "0.1.4"
+  }
+}
