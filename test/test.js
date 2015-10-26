@@ -13,7 +13,6 @@ var config = [{
 	destination: 'dark.styl'
 }, {
 	pages: pagesToRead,
-	useHex: true,
 	destination: '/light.styl'
 }];
 
@@ -27,7 +26,8 @@ function done() {
 function errorHandler(err) {
 	console.log('Converting process failed:', err);
 }
-confluence.readToFile(pagesToRead, '/test/out/test.styl')
+
+confluence.readToFile([103777451], '/test/out/test.styl')
 		.then(done)
 		.catch(errorHandler);
 
@@ -35,6 +35,6 @@ confluence.readToMultipleFiles(config)
 		.then(done)
 		.catch(errorHandler);
 
-//confluence.write(pagesToWrite)
-//		.then(done)
-//		.catch(errorHandler);
+confluence.write(pagesToWrite, 'test/out/api')
+		.then(done)
+		.catch(errorHandler);

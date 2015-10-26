@@ -87,7 +87,7 @@ function writeToConfluence(pageId, data) {
  * @param {String} [sourceFolder='test/out/api'] –folder containing files
  * @return {Promise.<String>}
  */
-function publishAll(pages, sourceFolder = 'test/out/api') {
+function publishAll(pages, sourceFolder) {
 
 	process.chdir(sourceFolder);
 

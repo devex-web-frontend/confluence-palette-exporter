@@ -1,13 +1,12 @@
 {
-  "name": "confluencePaletteExporter",
+  "name": "confluenceHelper",
   "version": "0.0.1",
   "description": "",
   "main": "index.js",
   "scripts": {
-    "watch": "gulp",
     "test": "node test/test.js"
   },
-  "author": "",
+  "author": "Devexperts",
   "license": "ISC",
   "dependencies": {
     "cheerio": "^0.19.0",
