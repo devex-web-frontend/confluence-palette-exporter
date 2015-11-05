@@ -1,7 +1,7 @@
 'use strict';
 
 var buffer = require('./helpers/buffer.js');
-var styl = require('./helpers/stylusGenerator.js');
+var fileGenerator = require('./helpers/fileGenerator.js');
 var Promise = require('promise');
 var colors = require('colors');
 
@@ -54,7 +54,7 @@ function readToFile(pages) {
 	});
 
 	return Promise.all(promises).then(function (result) {
-		return styl.write(result, destination);
+		return fileGenerator.write(result, destination);
 	})['catch'](function (err) {
 		errorHandler(err);
 		return Promise.reject(err);

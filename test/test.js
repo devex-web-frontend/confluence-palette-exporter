@@ -10,10 +10,10 @@ var pagesToRead = [{
 
 var config = [{
 	pages: [103777451, 103777451],
-	destination: 'dark.styl'
+	destination: 'test/out/dark.json'
 }, {
 	pages: pagesToRead,
-	destination: '/light.styl'
+	destination: './test/out//light.styl'
 }];
 
 var pagesToWrite = {

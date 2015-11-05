@@ -1,5 +1,5 @@
 let buffer = require('./helpers/buffer.js');
-let styl = require('./helpers/stylusGenerator.js');
+let fileGenerator = require('./helpers/fileGenerator.js');
 let Promise = require('promise');
 let colors = require('colors');
 
@@ -52,7 +52,7 @@ function readToFile(pages, destination = 'test.styl') {
 	return Promise
 		.all(promises)
 		.then(result => {
-			return styl.write(result, destination);
+			return fileGenerator.write(result, destination);
 		})
 		.catch(err => {
 			errorHandler(err);

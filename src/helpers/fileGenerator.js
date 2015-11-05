@@ -2,10 +2,11 @@ let fs = require('fs');
 let path = require('path');
 let cheerio = require('cheerio');
 let Promise = require('promise');
-let colors = require('colors');
+let parser = require('./colorsTableParser.js');
+var objectAssign = require('object-assign');
 
 module.exports = {
-	write: generateStylusFile
+	write: generateFile
 };
 /**
  * Sanitizes file path to start with /
@@ -36,7 +37,7 @@ function createFolders(relativePath) {
 		}
 	});
 
-	return path.join(folderPath, fileName)
+	return path.join(folderPath, fileName);
 }
 /**
  * Returns promise for writing to file
@@ -59,55 +60,6 @@ function writeToFile(text, relativePath) {
 	});
 }
 /**
- * Creates color value with opacity
- * @param {String} color – color in rgb() or HEX format
- * @param {Number} opacity – opacity in percents
- * @param {Boolean} useHex is color in HEX format
- * @return {Object.<String, string>}
- */
-function addOpacity(color, opacity, useHex) {
-	let newColor = useHex ? color : color.slice(color.indexOf('(') + 1, color.length - 1);
-
-	return `rgba(${newColor}, ${opacity / 100})`;
-}
-/**
- * Parses HTML table into map of variables and its values
- * @param {String} string – HTML node
- * @return {Object.<String, string>}
- */
-function parseTable(string, useHex) {
-	let $ = cheerio.load(string),
-		map = {};
-
-	$('tbody tr').each((t, elem) => {
-			if ($(elem).children('td').length > 1) {
-				let colorIndex = $('td:first-child', elem).html(),
-					names = $('td:last-child', elem).text() || '',
-					hexColor = $('td:first-child + td', elem).text() || '',
-					rgbColor = $('td:first-child + td + td', elem).attr('style') || '',
-					color = useHex ? ('#' + hexColor) : '' +
-					rgbColor.slice(('background-color: ').length, rgbColor.length - 1);
-
-				names = names.replace(new RegExp('<(/)*span>', 'g'), '').replace(/&#xA0;/g, '').split(',');
-
-				names.forEach(name => {
-					let opacity = name.match(/(\d+)\%/);
-					let processedColor = color;
-					if (!!opacity) {
-						name = name.slice(0, opacity.index - 1);
-						processedColor = addOpacity(color, parseInt(opacity[1]), useHex);
-					}
-					name = name.replace(/ /g, '').toLowerCase().trim();
-					map[name] = processedColor;
-				});
-			}
-
-		}
-	);
-
-	return map;
-}
-/**
  * Returns hash
  * @param {String} hashName
  * @param {String} hashData – which is needed to be wrapped
@@ -117,12 +69,11 @@ function wrapHash(hashName, hashData) {
 	let result = '';
 	if (hashName) {
 		hashData = hashData.slice(0, hashData.length - 2) + '\n';
-		result += `$${hashName} = { \n`;
-		result += hashData;
-		result += '};\n';
+		result += `$${hashName} = { \n ${hashData}};\n`;
 	} else {
 		result = hashData;
 	}
+
 	return result;
 }
 /**
@@ -133,7 +84,7 @@ function wrapHash(hashName, hashData) {
  * @return {String}
  */
 
-function composeLine(varName, varValue, isInHash = false) {
+function composeStylusLine(varName, varValue, isInHash = false) {
 	if (isInHash) {
 		return `\t${varName}: ${varValue},\n`;
 	}
@@ -146,30 +97,57 @@ function composeLine(varName, varValue, isInHash = false) {
  * @param {String=} name – hash name
  * @return {String}
  */
-function createPageVariables(string, name, useHex) {
-	let map = parseTable(string, useHex),
+function composePageColors(page) {
+	let map = parser.parseTable(page.data, page.useHex),
 		result = '';
 
 	Object
 		.keys(map)
 		.forEach(key => {
-			result += composeLine(key, map[key], !!name)
+			result += composeStylusLine(key, map[key], !!page.name)
 		});
 
-	return wrapHash(name, result);
+	return wrapHash(page.name, result);
 }
+/**
+ * Returns variables from page as an object
+ * @param {String} string – HTML
+ * @param {String=} name – hash name
+ * @return {String}
+ */
+function composeColorsObject(page) {
+	let map = parser.parseTable(page.data, page.useHex);
+	let newObj = {};
+
+	if (page.name) {
+		newObj[page.name] = map;
+	} else {
+		newObj = map;
+	}
+	return newObj;
+}
+
 /**
  * Returns promise for writing from confluence to .styl file
  * @param {Array.<Object.<{data:String, name:String}>>} dataArray
  * @param {String} destination – file path
  * @return {Promise.<String>}
  */
-function generateStylusFile(dataArray, destination) {
-	let result = '';
-
-	dataArray.forEach(page => {
-		result += createPageVariables(page.data, page.name, page.useHex)
-	});
+function generateFile(dataArray, destination) {
+	let result;
+	let isJSON = path.extname(destination).toLowerCase() === '.json';
+	if (isJSON) {
+		result = {};
+		dataArray.forEach(page => {
+			objectAssign(result, composeColorsObject(page));
+		});
+		result = JSON.stringify(result, null, 4);
+	} else {
+		result = '';
+		dataArray.forEach(page => {
+			result += composePageColors(page)
+		});
+	}
 
 	return writeToFile(result, destination);
 }

@@ -59,8 +59,7 @@ function prepareData(data) {
  * @return {Promise.<String>}
  */
 function processFile(file, pageId) {
-
-	if (path.existsSync(file)) {
+	if (fs.existsSync(file)) {
 		var filePath = path.join(process.cwd(), file);
 		var buf = fs.readFileSync(filePath).toString();
 		var result = prepareData(buf);

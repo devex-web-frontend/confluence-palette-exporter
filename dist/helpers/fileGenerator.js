@@ -4,11 +4,11 @@ var fs = require('fs');
 var path = require('path');
 var cheerio = require('cheerio');
 var Promise = require('promise');
-var colors = require('colors');
 var parser = require('./colorsTableParser.js');
+var objectAssign = require('object-assign');
 
 module.exports = {
-	write: generateStylusFile
+	write: generateFile
 };
 /**
  * Sanitizes file path to start with /
@@ -71,12 +71,11 @@ function wrapHash(hashName, hashData) {
 	var result = '';
 	if (hashName) {
 		hashData = hashData.slice(0, hashData.length - 2) + '\n';
-		result += '$' + hashName + ' = { \n';
-		result += hashData;
-		result += '};\n';
+		result += '$' + hashName + ' = { \n ' + hashData + '};\n';
 	} else {
 		result = hashData;
 	}
+
 	return result;
 }
 /**
@@ -87,7 +86,7 @@ function wrapHash(hashName, hashData) {
  * @return {String}
  */
 
-function composeLine(varName, varValue) {
+function composeStylusLine(varName, varValue) {
 	var isInHash = arguments.length <= 2 || arguments[2] === undefined ? false : arguments[2];
 
 	if (isInHash) {
@@ -101,28 +100,55 @@ function composeLine(varName, varValue) {
  * @param {String=} name – hash name
  * @return {String}
  */
-function createPageVariables(string, name, useHex) {
-	var map = parser.parseTable(string, useHex),
+function composePageColors(page) {
+	var map = parser.parseTable(page.data, page.useHex),
 	    result = '';
 
 	Object.keys(map).forEach(function (key) {
-		result += composeLine(key, map[key], !!name);
+		result += composeStylusLine(key, map[key], !!page.name);
 	});
 
-	return wrapHash(name, result);
+	return wrapHash(page.name, result);
 }
+/**
+ * Returns variables from page as an object
+ * @param {String} string – HTML
+ * @param {String=} name – hash name
+ * @return {String}
+ */
+function composeColorsObject(page) {
+	var map = parser.parseTable(page.data, page.useHex);
+	var newObj = {};
+
+	if (page.name) {
+		newObj[page.name] = map;
+	} else {
+		newObj = map;
+	}
+	return newObj;
+}
+
 /**
  * Returns promise for writing from confluence to .styl file
  * @param {Array.<Object.<{data:String, name:String}>>} dataArray
  * @param {String} destination – file path
  * @return {Promise.<String>}
  */
-function generateStylusFile(dataArray, destination) {
-	var result = '';
-
-	dataArray.forEach(function (page) {
-		result += createPageVariables(page.data, page.name, page.useHex);
-	});
+function generateFile(dataArray, destination) {
+	var result = undefined;
+	var isJSON = path.extname(destination).toLowerCase() === '.json';
+	if (isJSON) {
+		result = {};
+		dataArray.forEach(function (page) {
+			objectAssign(result, composeColorsObject(page));
+		});
+		result = JSON.stringify(result, null, 4);
+	} else {
+		result = '';
+		dataArray.forEach(function (page) {
+			result += composePageColors(page);
+		});
+	}
 
 	return writeToFile(result, destination);
 }
