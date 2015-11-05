@@ -2,7 +2,7 @@
 Plugin for confluence reading/writing
 ## How to use
 ### Reading color palette from confluence
-Destination file can have `.json` or `.styl` extname.
+Destination file can have `.js` or `.styl` extname.
 #### To single file
 ```
 var pagesToRead = [

@@ -3,7 +3,8 @@ let path = require('path');
 let cheerio = require('cheerio');
 let Promise = require('promise');
 let parser = require('./colorsTableParser.js');
-var objectAssign = require('object-assign');
+let objectAssign = require('object-assign');
+let toSource = require('tosource');
 
 module.exports = {
 	write: generateFile
@@ -135,13 +136,13 @@ function composeColorsObject(page) {
  */
 function generateFile(dataArray, destination) {
 	let result;
-	let isJSON = path.extname(destination).toLowerCase() === '.json';
-	if (isJSON) {
+	let isJS = path.extname(destination).toLowerCase() === '.js';
+	if (isJS) {
 		result = {};
 		dataArray.forEach(page => {
 			objectAssign(result, composeColorsObject(page));
 		});
-		result = JSON.stringify(result, null, 4);
+		result = `export default ${toSource(result)};`;
 	} else {
 		result = '';
 		dataArray.forEach(page => {

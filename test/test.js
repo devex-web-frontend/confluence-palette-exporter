@@ -10,10 +10,10 @@ var pagesToRead = [{
 
 var config = [{
 	pages: [103777451, 103777451],
-	destination: 'test/out/dark.json'
+	destination: 'test/out/dark.js'
 }, {
 	pages: pagesToRead,
-	destination: './test/out//light.styl'
+	destination: './test/out//light.js'
 }];
 
 var pagesToWrite = {
@@ -27,14 +27,18 @@ function errorHandler(err) {
 	console.log('Converting process failed:', err);
 }
 
-confluence.readToFile([103777451], '/test/out/test.styl')
-		.then(done)
-		.catch(errorHandler);
+//confluence.readToFile([103777451], '/test/out/test.styl')
+//		.then(done)
+//		.catch(errorHandler);
+
+//confluence.readToFile([103777451], '/test/out/test.js')
+//		.then(done)
+//		.catch(errorHandler);
 
 confluence.readToMultipleFiles(config)
-		.then(done)
-		.catch(errorHandler);
-
-confluence.write(pagesToWrite, 'test/out/api')
-		.then(done)
-		.catch(errorHandler);
+//		.then(done)
+//		.catch(errorHandler);
+//
+//confluence.write(pagesToWrite, 'test/out/api')
+//		.then(done)
+//		.catch(errorHandler);

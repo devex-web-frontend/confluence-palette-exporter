@@ -17,7 +17,8 @@
     "object-assign": "^4.0.1",
     "promise": "^7.0.1",
     "prompt": "^0.2.14",
-    "sanitize-html": "^1.6.1"
+    "sanitize-html": "^1.6.1",
+    "tosource": "^1.0.0"
   },
   "devDependencies": {
     "gulp": "^3.8.11",
