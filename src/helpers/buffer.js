@@ -49,11 +49,17 @@ function respondHandler(res, resolve, reject) {
 		respond += chunk;
 	});
 	res.on('end', () => {
-		let result = JSON.parse(respond);
-		if (!!result.statusCode) {
-			reject(`${result.statusCode} : ${result.message}`);
+		var result;
+		try {
+			result = JSON.parse(respond);
+			if (!!result.statusCode) {
+				reject(result.statusCode + ' : ' + result.message);
+			}
+			resolve(result);
 		}
-		resolve(result);
+		catch(ex) {
+			reject('invalid credentials');
+		}
 	});
 }
 

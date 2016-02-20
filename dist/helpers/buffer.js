@@ -52,11 +52,16 @@ function respondHandler(res, resolve, reject) {
 		respond += chunk;
 	});
 	res.on('end', function () {
-		var result = JSON.parse(respond);
-		if (!!result.statusCode) {
-			reject(result.statusCode + ' : ' + result.message);
+		var result;
+		try {
+			result = JSON.parse(respond);
+			if (!!result.statusCode) {
+				reject(result.statusCode + ' : ' + result.message);
+			}
+			resolve(result);
+		} catch (ex) {
+			reject('invalid credentials');
 		}
-		resolve(result);
 	});
 }
 
