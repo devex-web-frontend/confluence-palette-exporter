@@ -2,5 +2,5 @@ node_modules/
 npm-debug.log
 .DS_Store
 .idea/
-credinals.json
+credentials.json
 test/out

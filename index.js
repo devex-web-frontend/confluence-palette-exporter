@@ -7,28 +7,28 @@ module.exports = {
 	readToMultipleFiles: readToMultipleFiles,
 	write: writetoFile
 };
-function credinalsError() {
-	console.log('credinals getting error')
+function credentialsError() {
+	console.log('credentials getting error')
 }
 
 function readToFile() {
 	var args = arguments;
-	return auth.requestCredinals().then(function() {
+	return auth.requestCredentials().then(function() {
 		read.readToFile(args[0], args[1]);
-	}, credinalsError);
+	}, credentialsError);
 }
 
 function readToMultipleFiles() {
 	var args = arguments;
-	return auth.requestCredinals().then(function() {
+	return auth.requestCredentials().then(function() {
 		read.readToMultipleFiles(args[0]);
-	},credinalsError)
+	},credentialsError)
 }
 
 function writetoFile() {
 	var args = arguments;
-	return auth.requestCredinals().then(function() {
+	return auth.requestCredentials().then(function() {
 		write.write(args[0], args[1]);
-	},credinalsError)
+	},credentialsError)
 }
 

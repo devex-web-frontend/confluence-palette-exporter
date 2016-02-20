@@ -21,8 +21,8 @@ module.exports = {
 function createRequest(path) {
 	var method = arguments.length <= 1 || arguments[1] === undefined ? 'GET' : arguments[1];
 
-	var credinals = auth.getCreds();
-	var authorisation = new Buffer(credinals.user + ':' + credinals.pass).toString('base64');
+	var credentials = auth.getCreds();
+	var authorisation = new Buffer(credentials.user + ':' + credentials.pass).toString('base64');
 	return {
 		host: 'confluence.in.devexperts.com',
 		port: 443,

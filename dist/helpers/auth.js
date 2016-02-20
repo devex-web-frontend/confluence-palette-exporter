@@ -5,26 +5,26 @@ var fs = require('fs');
 var path = require('path');
 var Promise = require('promise');
 
-var absoluteCredinalsPath = path.join(process.cwd(), '/credinals.json');
-var relativeCredinalsPath = path.relative(__dirname, absoluteCredinalsPath);
+var absoluteCredentialsPath = path.join(process.cwd(), '/credentials.json');
+var relativeCredentialsPath = path.relative(__dirname, absoluteCredentialsPath);
 
-var credinals = fs.existsSync(absoluteCredinalsPath) ? require(relativeCredinalsPath) : {};
+var credentials = fs.existsSync(absoluteCredentialsPath) ? require(relativeCredentialsPath) : {};
 
 module.exports = {
-	requestCredinals: getAuthInfo,
+	requestCredentials: getAuthInfo,
 	getCreds: function getCreds() {
-		return credinals;
+		return credentials;
 	}
 };
 
-function createCredinalsFile(data) {
-	fs.writeFile(absoluteCredinalsPath, data, function () {
-		console.log("The file " + absoluteCredinalsPath.toString() + " was saved!");
+function createCredentialsFile(data) {
+	fs.writeFile(absoluteCredentialsPath, data, function () {
+		console.log("The file " + absoluteCredentialsPath.toString() + " was saved!");
 	});
 }
 /**
- * Returns promise for getting user credinals
- * @param {Boolean=} needToSave – whether credinals should be saved into JSON
+ * Returns promise for getting user credentials
+ * @param {Boolean=} needToSave – whether credentials should be saved into JSON
  * @return {Promise.<{user: String, pass: String}>}
  */
 function getAuthInfo() {
@@ -38,7 +38,7 @@ function getAuthInfo() {
 		name: 'pass',
 		hidden: true
 	}],
-	    saveCredinals = {
+	    saveCredentials = {
 		description: 'Save to crendinals.json? Y/N',
 		name: 'needToSave',
 		conform: function conform(res) {
@@ -46,25 +46,25 @@ function getAuthInfo() {
 		}
 	};
 	if (needToSave) {
-		properties.push(saveCredinals);
+		properties.push(saveCredentials);
 	}
 	prompt.start();
 
 	return new Promise(function (resolve, reject) {
-		if (!credinals || !credinals.pass || !credinals.user) {
+		if (!credentials || !credentials.pass || !credentials.user) {
 			prompt.get(properties, function (err, res) {
 				if (err) {
 					reject(err);
 				} else {
-					credinals = { user: res.user, pass: res.pass };
+					credentials = { user: res.user, pass: res.pass };
 					if (res.needToSave === 'Y') {
-						createCredinalsFile(JSON.stringify(credinals));
+						createCredentialsFile(JSON.stringify(credentials));
 					}
-					resolve(credinals);
+					resolve(credentials);
 				}
 			});
 		} else {
-			resolve(credinals);
+			resolve(credentials);
 		}
 	});
 }
