@@ -13,31 +13,27 @@ module.exports = {
  * Returns promise for getting request properties
  * @param {String} path
  * @param {String} [method='GET']
- * @return {Promise.<Object>}
+ * @return {Object}
  */
 
 function createRequest(path, method = 'GET') {
-	let promise = new Promise(resolve => {
-		auth.getCredinals()
-			.then(conf => {
-				let auth = new Buffer(conf.user + ':' + conf.pass).toString('base64');
-				resolve({
-					host: 'confluence.in.devexperts.com',
-					port: 443,
-					contentType: "application/json; charset=utf-8",
-					path: path,
-					method: method,
-					headers: {
-						'Authorization': `Basic ${auth}`,
-						'Content-Type': 'application/json'
-					},
-					rejectUnauthorized: false,
-					requestCert: true,
-					agent: false
-				});
-			});
-	});
-	return promise;
+	let credinals = auth.getCreds();
+	let authorisation = new Buffer(credinals.user + ':' + credinals.pass).toString('base64');
+	return {
+		host: 'confluence.in.devexperts.com',
+		port: 443,
+		contentType: "application/json; charset=utf-8",
+		path: path,
+		method: method,
+		headers: {
+			'Authorization': `Basic ${authorisation}`,
+			'Content-Type': 'application/json'
+		},
+		rejectUnauthorized: false,
+		requestCert: true,
+		agent: false
+	};
+
 }
 
 /**
@@ -70,8 +66,8 @@ function get(request) {
 
 	return new Promise((resolve, reject) => {
 		https.get(request, res => {
-			respondHandler(res, resolve, reject);
-		})
+				respondHandler(res, resolve, reject);
+			})
 			.on('error', reject);
 	});
 }
@@ -125,7 +121,7 @@ function composeData(pageId, newContent, currentPage) {
  */
 function getPageContent(pageId) {
 	let path = `/rest/api/content/${pageId}?expand=body.view,version`;
-	return createRequest(path).then(get);
+	return get(createRequest(path));
 }
 
 /**

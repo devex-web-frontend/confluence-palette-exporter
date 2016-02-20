@@ -15,32 +15,28 @@ module.exports = {
  * Returns promise for getting request properties
  * @param {String} path
  * @param {String} [method='GET']
- * @return {Promise.<Object>}
+ * @return {Object}
  */
 
 function createRequest(path) {
 	var method = arguments.length <= 1 || arguments[1] === undefined ? 'GET' : arguments[1];
 
-	var promise = new Promise(function (resolve) {
-		auth.getCredinals().then(function (conf) {
-			var auth = new Buffer(conf.user + ':' + conf.pass).toString('base64');
-			resolve({
-				host: 'confluence.in.devexperts.com',
-				port: 443,
-				contentType: "application/json; charset=utf-8",
-				path: path,
-				method: method,
-				headers: {
-					'Authorization': 'Basic ' + auth,
-					'Content-Type': 'application/json'
-				},
-				rejectUnauthorized: false,
-				requestCert: true,
-				agent: false
-			});
-		});
-	});
-	return promise;
+	var credinals = auth.getCreds();
+	var authorisation = new Buffer(credinals.user + ':' + credinals.pass).toString('base64');
+	return {
+		host: 'confluence.in.devexperts.com',
+		port: 443,
+		contentType: "application/json; charset=utf-8",
+		path: path,
+		method: method,
+		headers: {
+			'Authorization': 'Basic ' + authorisation,
+			'Content-Type': 'application/json'
+		},
+		rejectUnauthorized: false,
+		requestCert: true,
+		agent: false
+	};
 }
 
 /**
@@ -126,7 +122,7 @@ function composeData(pageId, newContent, currentPage) {
  */
 function getPageContent(pageId) {
 	var path = '/rest/api/content/' + pageId + '?expand=body.view,version';
-	return createRequest(path).then(get);
+	return get(createRequest(path));
 }
 
 /**
