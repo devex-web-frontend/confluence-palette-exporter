@@ -27,6 +27,7 @@ function errorHandler(err) {
 	console.log('Converting process failed:', err);
 }
 
+confluence.saveCreds(true);
 confluence.readToFile([103777451], '/test/out/test.styl')
 	.then(function() {
 		return confluence.readToFile([103777451], '/test/out/test.js').then(done)
