@@ -27,13 +27,14 @@ function readPage(page) {
 	}
 	return new Promise(function (resolve, reject) {
 		buffer.read(pageId).then(function (respond) {
-			console.log(('Succsessfully read ' + pageId).green);
 			resolve({
 				name: pageName,
 				data: respond.body.view.value,
 				useHex: page.useHex
 			});
-		})['catch'](reject);
+		})['catch'](function (err) {
+			reject('Error reading: ' + err);
+		});
 	});
 }
 

@@ -53,7 +53,7 @@ function responseHandler(res, resolve, reject) {
 		try {
 			result = JSON.parse(respond);
 			if (!!result.statusCode) {
-				reject(result.statusCode + ' : ' + result.message);
+				reject(`${result.message} (status code: ${result.statusCode})`);
 			}
 			resolve(result);
 		}
