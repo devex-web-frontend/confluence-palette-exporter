@@ -42,7 +42,7 @@ function createRequest(path, method = 'GET') {
  * @param {Function} resolve
  * @param {Function} reject
  */
-function respondHandler(res, resolve, reject) {
+function responseHandler(res, resolve, reject) {
 	let respond = '';
 
 	res.on('data', chunk => {
@@ -72,7 +72,7 @@ function get(request) {
 
 	return new Promise((resolve, reject) => {
 		https.get(request, res => {
-				respondHandler(res, resolve, reject);
+				responseHandler(res, resolve, reject);
 			})
 			.on('error', reject);
 	});
@@ -86,7 +86,7 @@ function get(request) {
 function set(request, data) {
 	return new Promise((resolve, reject) => {
 		let R = https.request(request, res => {
-			respondHandler(res, resolve, reject);
+			responseHandler(res, resolve, reject);
 		});
 		R.on('error', reject);
 		R.write(data);

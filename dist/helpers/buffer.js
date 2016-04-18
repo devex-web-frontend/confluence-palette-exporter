@@ -45,7 +45,7 @@ function createRequest(path) {
  * @param {Function} resolve
  * @param {Function} reject
  */
-function respondHandler(res, resolve, reject) {
+function responseHandler(res, resolve, reject) {
 	var respond = '';
 
 	res.on('data', function (chunk) {
@@ -74,7 +74,7 @@ function get(request) {
 
 	return new Promise(function (resolve, reject) {
 		https.get(request, function (res) {
-			respondHandler(res, resolve, reject);
+			responseHandler(res, resolve, reject);
 		}).on('error', reject);
 	});
 }
@@ -87,7 +87,7 @@ function get(request) {
 function set(request, data) {
 	return new Promise(function (resolve, reject) {
 		var R = https.request(request, function (res) {
-			respondHandler(res, resolve, reject);
+			responseHandler(res, resolve, reject);
 		});
 		R.on('error', reject);
 		R.write(data);

@@ -42,7 +42,7 @@ function getAuthInfo() {
 		description: 'Save to crendinals.json? Y/N',
 		name: 'needToSave',
 		conform: function conform(res) {
-			return res === 'Y' || res === 'N';
+			return res.toLowerCase() === 'y' || res.toLowerCase() === 'n';
 		}
 	};
 	if (needToSave) {
@@ -57,7 +57,7 @@ function getAuthInfo() {
 					reject(err);
 				} else {
 					credentials = { user: res.user, pass: res.pass };
-					if (res.needToSave === 'Y') {
+					if (res.needToSave.toLowerCase() === 'y') {
 						createCredentialsFile(JSON.stringify(credentials));
 					}
 					resolve(credentials);
