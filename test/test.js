@@ -1,12 +1,13 @@
 var confluence = require('../index.js');
+var colors = require('colors');
 
 var pagesToRead = [{
-		name: 'darkScheme',
-		id: 103777451
-	}, {
-		id: 104825455,
-		useHex: true
-	}];
+	name: 'darkScheme',
+	id: 103777451
+}, {
+	id: 104825455,
+	useHex: true
+}];
 
 var config = [{
 	pages: [103777451, 103777451],
@@ -20,25 +21,33 @@ var pagesToWrite = {
 	NumericStepper: 108139548
 };
 
-function done() {
-	console.log('converting process finished');
+function done(result) {
+	if (!Array.isArray(result)) {
+		result = [result];
+	}
+	result.forEach(res => {console.log(res.green)});
 }
 function errorHandler(err) {
-	console.log('Converting process failed:', err);
+	console.log(err.red);
 }
 
-//confluence.readToFile([103777451], '/test/out/test.styl')
-//		.then(done)
-//		.catch(errorHandler);
+confluence.auth(true)
 
-//confluence.readToFile([103777451], '/test/out/test.js')
-//		.then(done)
-//		.catch(errorHandler);
+	.then(function() {
+		return confluence.readToFile([103777451], '/test/out/test.styl').then(done);
+	})
+	.then(function() {
 
-confluence.readToMultipleFiles(config)
-//		.then(done)
-//		.catch(errorHandler);
-//
-//confluence.write(pagesToWrite, 'test/out/api')
-//		.then(done)
-//		.catch(errorHandler);
+		return confluence.readToFile([103777451], '/test/out/test.js').then(done);
+	})
+	.then(function() {
+		return confluence.readToMultipleFiles(config).then(done);
+	})
+	.then(function() {
+		return confluence.write(pagesToWrite, 'test/out/api').then(done);
+	})
+	.catch(errorHandler);
+
+
+
+

@@ -3,7 +3,7 @@ let fs = require('fs');
 let path = require('path');
 let sanitizeHtml = require('sanitize-html');
 let Promise = require('promise');
-let colors = require('colors');
+
 
 
 let buffer = require('./helpers/buffer.js');
@@ -76,7 +76,7 @@ function writeToConfluence(pageId, data) {
 	return buffer.write(pageId, data)
 		.then(respond => {
 			let href = composeLink(respond);
-			console.log(`Succesffuly written to page ${pageId} (${href})`.green);
+			return `Succesffuly written to page ${pageId} (${href})`;
 		})
 		.catch(err => Promise.reject(err))
 }
@@ -98,7 +98,6 @@ function publishAll(pages, sourceFolder) {
 
 	return Promise.all(promises)
 		.catch(err => {
-			console.log(`Error writing: ${err}`.red);
-			return Promise.reject(err);
+			return Promise.reject(`Error writing: ${err}`);
 		});
 }

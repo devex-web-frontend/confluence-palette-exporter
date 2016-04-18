@@ -13,31 +13,27 @@ module.exports = {
  * Returns promise for getting request properties
  * @param {String} path
  * @param {String} [method='GET']
- * @return {Promise.<Object>}
+ * @return {Object}
  */
 
 function createRequest(path, method = 'GET') {
-	let promise = new Promise(resolve => {
-		auth.getCredinals()
-			.then(conf => {
-				let auth = new Buffer(conf.user + ':' + conf.pass).toString('base64');
-				resolve({
-					host: 'confluence.in.devexperts.com',
-					port: 443,
-					contentType: "application/json; charset=utf-8",
-					path: path,
-					method: method,
-					headers: {
-						'Authorization': `Basic ${auth}`,
-						'Content-Type': 'application/json'
-					},
-					rejectUnauthorized: false,
-					requestCert: true,
-					agent: false
-				});
-			});
-	});
-	return promise;
+	let credentials = auth.getCreds();
+	let authorisation = new Buffer(credentials.user + ':' + credentials.pass).toString('base64');
+	return {
+		host: 'confluence.in.devexperts.com',
+		port: 443,
+		contentType: "application/json; charset=utf-8",
+		path: path,
+		method: method,
+		headers: {
+			'Authorization': `Basic ${authorisation}`,
+			'Content-Type': 'application/json'
+		},
+		rejectUnauthorized: false,
+		requestCert: true,
+		agent: false
+	};
+
 }
 
 /**
@@ -46,18 +42,24 @@ function createRequest(path, method = 'GET') {
  * @param {Function} resolve
  * @param {Function} reject
  */
-function respondHandler(res, resolve, reject) {
+function responseHandler(res, resolve, reject) {
 	let respond = '';
 
 	res.on('data', chunk => {
 		respond += chunk;
 	});
 	res.on('end', () => {
-		let result = JSON.parse(respond);
-		if (!!result.statusCode) {
-			reject(`${result.statusCode} : ${result.message}`);
+		var result;
+		try {
+			result = JSON.parse(respond);
+			if (!!result.statusCode) {
+				reject(`${result.message} (status code: ${result.statusCode})`);
+			}
+			resolve(result);
 		}
-		resolve(result);
+		catch(ex) {
+			reject('invalid credentials');
+		}
 	});
 }
 
@@ -70,8 +72,8 @@ function get(request) {
 
 	return new Promise((resolve, reject) => {
 		https.get(request, res => {
-			respondHandler(res, resolve, reject);
-		})
+				responseHandler(res, resolve, reject);
+			})
 			.on('error', reject);
 	});
 }
@@ -84,7 +86,7 @@ function get(request) {
 function set(request, data) {
 	return new Promise((resolve, reject) => {
 		let R = https.request(request, res => {
-			respondHandler(res, resolve, reject);
+			responseHandler(res, resolve, reject);
 		});
 		R.on('error', reject);
 		R.write(data);
@@ -125,7 +127,7 @@ function composeData(pageId, newContent, currentPage) {
  */
 function getPageContent(pageId) {
 	let path = `/rest/api/content/${pageId}?expand=body.view,version`;
-	return createRequest(path).then(get);
+	return get(createRequest(path));
 }
 
 /**

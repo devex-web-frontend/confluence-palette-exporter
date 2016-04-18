@@ -55,8 +55,7 @@ function writeToFile(text, relativePath) {
 			if (err) {
 				reject(err);
 			}
-			resolve();
-			console.log(`The file ${relativePath} was saved!`.magenta);
+			resolve(`The file ${relativePath} was saved!`);
 		});
 	});
 }

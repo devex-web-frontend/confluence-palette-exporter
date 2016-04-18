@@ -10,9 +10,6 @@ module.exports = {
 	readToMultipleFiles: readToMultipleFiles
 };
 
-function errorHandler(err) {
-	console.error(('Error reading: ' + err).red);
-}
 /**
  * Returns promise for reading page from confluence
  * @param {Object.<{id:string|number, pageName: ?string}>} page data
@@ -30,13 +27,14 @@ function readPage(page) {
 	}
 	return new Promise(function (resolve, reject) {
 		buffer.read(pageId).then(function (respond) {
-			console.log(('Succsessfully read ' + pageId).green);
 			resolve({
 				name: pageName,
 				data: respond.body.view.value,
 				useHex: page.useHex
 			});
-		})['catch'](reject);
+		})['catch'](function (err) {
+			reject('Error reading: ' + err);
+		});
 	});
 }
 
@@ -56,7 +54,6 @@ function readToFile(pages) {
 	return Promise.all(promises).then(function (result) {
 		return fileGenerator.write(result, destination);
 	})['catch'](function (err) {
-		errorHandler(err);
 		return Promise.reject(err);
 	});
 }

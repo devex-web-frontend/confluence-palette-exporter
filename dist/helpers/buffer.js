@@ -15,32 +15,28 @@ module.exports = {
  * Returns promise for getting request properties
  * @param {String} path
  * @param {String} [method='GET']
- * @return {Promise.<Object>}
+ * @return {Object}
  */
 
 function createRequest(path) {
 	var method = arguments.length <= 1 || arguments[1] === undefined ? 'GET' : arguments[1];
 
-	var promise = new Promise(function (resolve) {
-		auth.getCredinals().then(function (conf) {
-			var auth = new Buffer(conf.user + ':' + conf.pass).toString('base64');
-			resolve({
-				host: 'confluence.in.devexperts.com',
-				port: 443,
-				contentType: "application/json; charset=utf-8",
-				path: path,
-				method: method,
-				headers: {
-					'Authorization': 'Basic ' + auth,
-					'Content-Type': 'application/json'
-				},
-				rejectUnauthorized: false,
-				requestCert: true,
-				agent: false
-			});
-		});
-	});
-	return promise;
+	var credentials = auth.getCreds();
+	var authorisation = new Buffer(credentials.user + ':' + credentials.pass).toString('base64');
+	return {
+		host: 'confluence.in.devexperts.com',
+		port: 443,
+		contentType: "application/json; charset=utf-8",
+		path: path,
+		method: method,
+		headers: {
+			'Authorization': 'Basic ' + authorisation,
+			'Content-Type': 'application/json'
+		},
+		rejectUnauthorized: false,
+		requestCert: true,
+		agent: false
+	};
 }
 
 /**
@@ -49,18 +45,23 @@ function createRequest(path) {
  * @param {Function} resolve
  * @param {Function} reject
  */
-function respondHandler(res, resolve, reject) {
+function responseHandler(res, resolve, reject) {
 	var respond = '';
 
 	res.on('data', function (chunk) {
 		respond += chunk;
 	});
 	res.on('end', function () {
-		var result = JSON.parse(respond);
-		if (!!result.statusCode) {
-			reject(result.statusCode + ' : ' + result.message);
+		var result;
+		try {
+			result = JSON.parse(respond);
+			if (!!result.statusCode) {
+				reject(result.message + ' (status code: ' + result.statusCode + ')');
+			}
+			resolve(result);
+		} catch (ex) {
+			reject('invalid credentials');
 		}
-		resolve(result);
 	});
 }
 
@@ -73,7 +74,7 @@ function get(request) {
 
 	return new Promise(function (resolve, reject) {
 		https.get(request, function (res) {
-			respondHandler(res, resolve, reject);
+			responseHandler(res, resolve, reject);
 		}).on('error', reject);
 	});
 }
@@ -86,7 +87,7 @@ function get(request) {
 function set(request, data) {
 	return new Promise(function (resolve, reject) {
 		var R = https.request(request, function (res) {
-			respondHandler(res, resolve, reject);
+			responseHandler(res, resolve, reject);
 		});
 		R.on('error', reject);
 		R.write(data);
@@ -126,7 +127,7 @@ function composeData(pageId, newContent, currentPage) {
  */
 function getPageContent(pageId) {
 	var path = '/rest/api/content/' + pageId + '?expand=body.view,version';
-	return createRequest(path).then(get);
+	return get(createRequest(path));
 }
 
 /**
